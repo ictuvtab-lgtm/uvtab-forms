@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UVTAB Assessment Monitoring Tool</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:#f0f2f5;color:#1a1a2e;line-height:1.5}
+.app-header{background:#0d2137;color:#fff;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.3)}
+.header-top{display:flex;align-items:center;gap:14px;padding:10px 18px;border-bottom:1px solid rgba(255,255,255,.12)}
+.logo{width:38px;height:38px;background:#c8a84b;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:#0d2137;flex-shrink:0;letter-spacing:-.5px}
+.header-title{flex:1}
+.header-title h1{font-size:13px;font-weight:600;letter-spacing:.01em}
+.header-title p{font-size:11px;opacity:.65;margin-top:1px}
+.header-actions{display:flex;gap:8px}
+.hbtn{padding:6px 14px;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;border:none}
+.hbtn-gold{background:#c8a84b;color:#0d2137}
+.hbtn-ghost{background:rgba(255,255,255,.1);color:#fff}
+.hbtn:hover{opacity:.88}
+.tool-tabs{display:flex;padding:0 18px}
+.ttab{padding:8px 16px;font-size:12px;color:rgba(255,255,255,.55);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;user-select:none}
+.ttab:hover{color:#fff}
+.ttab.active{color:#c8a84b;border-bottom-color:#c8a84b;font-weight:500}
+.sec-nav{background:#fff;border-bottom:1px solid #e5e7eb;display:flex;overflow-x:auto;padding:0 18px;scrollbar-width:none;gap:2px}
+.sec-nav::-webkit-scrollbar{display:none}
+.snbtn{display:flex;align-items:center;gap:5px;padding:8px 11px;font-size:12px;color:#6b7280;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .15s;user-select:none}
+.snbtn:hover{color:#0d2137}
+.snbtn.active{color:#0d2137;border-bottom-color:#0d2137;font-weight:500}
+.dot{width:7px;height:7px;border-radius:50%;background:#e5e7eb;flex-shrink:0}
+.snbtn.partial .dot{background:#f59e0b}
+.snbtn.done .dot{background:#10b981}
+.main{max-width:1020px;margin:0 auto;padding:18px}
+.card{background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;margin-bottom:14px}
+.sec-head{background:#f8f9fa;border-bottom:1px solid #e5e7eb;padding:14px 18px}
+.sec-badge{display:inline-block;font-size:11px;background:#e8f4fd;color:#1a56db;padding:2px 8px;border-radius:4px;margin-bottom:5px;font-weight:500}
+.sec-head h2{font-size:15px;font-weight:600;color:#0d2137}
+.sec-head .note{font-size:12px;color:#6b7280;margin-top:4px;font-style:italic}
+/* Identification */
+.ident-grid{display:grid;grid-template-columns:220px 1fr}
+.il{padding:10px 18px;font-size:13px;color:#374151;border-bottom:1px solid #f3f4f6;border-right:1px solid #f3f4f6;background:#fafafa;font-weight:500;display:flex;align-items:center}
+.iv{padding:8px 14px;border-bottom:1px solid #f3f4f6;display:flex;align-items:center}
+.iv input{width:100%;border:1px solid #e5e7eb;border-radius:5px;padding:6px 10px;font-size:13px;color:#1a1a2e;font-family:inherit;outline:none;transition:border-color .15s}
+.iv input:focus{border-color:#0d2137;box-shadow:0 0 0 2px rgba(13,33,55,.08)}
+/* Indicators */
+.legend-bar{display:flex;gap:10px;flex-wrap:wrap;padding:10px 18px;background:#f8f9fa;border-bottom:1px solid #e5e7eb}
+.leg{display:flex;align-items:center;gap:5px;font-size:11px;color:#6b7280}
+.legdot{width:9px;height:9px;border-radius:2px;border:1px solid transparent}
+.itbl{width:100%;border-collapse:collapse}
+.itbl thead th{background:#f8f9fa;padding:9px 12px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#6b7280;text-align:left;border-bottom:1px solid #e5e7eb}
+.itbl tbody tr:last-child td{border-bottom:none}
+.itbl td{padding:11px 12px;border-bottom:1px solid #f3f4f6;vertical-align:top;font-size:13px}
+.td-no{width:44px;text-align:center;font-weight:600;color:#9ca3af;font-size:12px;padding-top:13px!important}
+.td-ind{color:#1a1a2e;line-height:1.55}
+.td-mv{width:175px;font-size:12px;color:#6b7280;font-style:italic;line-height:1.4}
+.td-rt{width:125px}
+.td-fi{width:205px}
+.rsel{width:100%;padding:6px 8px;border:1px solid #e5e7eb;border-radius:5px;font-size:12px;cursor:pointer;outline:none;background:#fff;transition:all .15s;font-family:inherit}
+.rsel:focus{border-color:#0d2137}
+.rsel.r1{background:#fef2f2;border-color:#fca5a5;color:#991b1b}
+.rsel.r2{background:#fffbeb;border-color:#fcd34d;color:#92400e}
+.rsel.r3{background:#f0fdf4;border-color:#86efac;color:#166534}
+.rsel.r4{background:#eff6ff;border-color:#93c5fd;color:#1e40af}
+.rsel.rNA{background:#f9fafb;border-color:#d1d5db;color:#6b7280}
+.fita{width:100%;border:1px solid #e5e7eb;border-radius:5px;padding:7px 10px;font-size:12px;font-family:inherit;resize:vertical;min-height:58px;outline:none;transition:border-color .15s;line-height:1.45}
+.fita:focus{border-color:#0d2137}
+/* Summary */
+.sum-wrap{padding:18px 20px}
+.oq{margin-bottom:18px}
+.oq label{display:block;font-size:13px;font-weight:500;color:#1a1a2e;margin-bottom:6px}
+.oq textarea{width:100%;border:1px solid #e5e7eb;border-radius:6px;padding:10px 12px;font-size:13px;font-family:inherit;resize:vertical;min-height:72px;outline:none;transition:border-color .15s;line-height:1.55}
+.oq textarea:focus{border-color:#0d2137}
+.risk-row{display:flex;gap:8px;margin-top:8px}
+.rbtn{flex:1;padding:8px;border:2px solid #e5e7eb;border-radius:7px;background:#fff;cursor:pointer;font-size:13px;font-weight:700;text-align:center;transition:all .15s;font-family:inherit}
+.rbtn.LOW.on{background:#f0fdf4;border-color:#10b981;color:#166534}
+.rbtn.MED.on{background:#fffbeb;border-color:#f59e0b;color:#92400e}
+.rbtn.HIGH.on{background:#fef2f2;border-color:#ef4444;color:#b91c1c}
+/* Sign-off */
+.cert-box{padding:14px 18px;background:#fffbeb;border-bottom:1px solid #fde68a}
+.cert-box p{font-size:13px;color:#78350f;line-height:1.65}
+.so-grid{display:grid;grid-template-columns:220px 1fr}
+.sl{padding:11px 18px;font-size:13px;font-weight:500;color:#374151;background:#fafafa;border-right:1px solid #f3f4f6;border-bottom:1px solid #f3f4f6;display:flex;align-items:center}
+.si{padding:9px 14px;border-bottom:1px solid #f3f4f6;display:flex;align-items:center}
+.si input{width:100%;border:1px solid #e5e7eb;border-radius:5px;padding:6px 10px;font-size:13px;font-family:inherit;outline:none;transition:border-color .15s}
+.si input:focus{border-color:#0d2137}
+.note-bar{padding:12px 18px;background:#f8f9fa;border-top:1px solid #e5e7eb}
+.note-bar p{font-size:12px;color:#6b7280;font-style:italic;line-height:1.55}
+/* Annex */
+.ax-table{width:100%;border-collapse:collapse}
+.ax-table th{background:#f8f9fa;padding:9px 13px;font-size:12px;font-weight:600;text-align:left;border-bottom:2px solid #e5e7eb;color:#374151}
+.ax-table td{padding:10px 13px;border-bottom:1px solid #f3f4f6;font-size:13px;vertical-align:middle}
+.chk{width:18px;height:18px;border:2px solid #d1d5db;border-radius:3px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;font-size:11px;font-weight:700;user-select:none;color:transparent}
+.chk.on{background:#0d2137;border-color:#0d2137;color:#fff}
+/* Nav bar */
+.nav-bar{background:#fff;border-top:1px solid #e5e7eb;padding:12px 18px;display:flex;align-items:center;justify-content:space-between;border-radius:0 0 10px 10px}
+.prog-info{font-size:12px;color:#6b7280}
+.prog-bar{height:4px;background:#e5e7eb;border-radius:2px;margin-top:5px;width:180px}
+.prog-fill{height:100%;background:#0d2137;border-radius:2px;transition:width .3s}
+.btn-grp{display:flex;gap:7px}
+.btn{padding:7px 18px;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;border:1px solid transparent;transition:all .15s;font-family:inherit}
+.btn-ghost{background:#fff;border-color:#d1d5db;color:#374151}
+.btn-ghost:hover{background:#f3f4f6}
+.btn-ghost:disabled{opacity:.4;cursor:not-allowed}
+.btn-primary{background:#0d2137;color:#fff;border-color:#0d2137}
+.btn-primary:hover{background:#162d4a}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed}
+.btn-danger{background:#fff;border-color:#fca5a5;color:#dc2626;font-size:12px;padding:7px 12px}
+.btn-danger:hover{background:#fef2f2}
+/* Score panel */
+.score-panel{background:#f8f9fa;border-top:1px solid #e5e7eb;padding:12px 18px;display:flex;gap:12px;flex-wrap:wrap}
+.score-chip{padding:4px 10px;border-radius:5px;font-size:12px;font-weight:600}
+/* Severity badges */
+.sev{display:inline-block;font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px}
+.sev-crit{background:#fef2f2;color:#7f1d1d}
+.sev-high{background:#fffbeb;color:#78350f}
+.sev-med{background:#fefce8;color:#713f12}
+.sev-low{background:#f0fdf4;color:#14532d}
+/* Top button */
+#topBtn{position:fixed;bottom:24px;right:20px;width:34px;height:34px;background:#0d2137;color:#fff;border:none;border-radius:50%;cursor:pointer;font-size:15px;display:none;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.25);z-index:500}
+@media(max-width:680px){
+  .td-mv{display:none}
+  .ident-grid,.so-grid{grid-template-columns:1fr}
+  .il,.sl{border-right:none;border-bottom:1px solid #e5e7eb}
+}
+@media print{
+  .app-header,.sec-nav,.nav-bar,#topBtn,.hbtn{display:none!important}
+  .card{break-inside:avoid;box-shadow:none;border:1px solid #ccc}
+  body{background:#fff;font-size:12px}
+  .main{max-width:100%;padding:0}
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<button id="topBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+<script>
+/* ======================================================
+   DATA
+   ====================================================== */
+const T1 = {
+  name:"Tool 1 — Formal TVET",
+  full:"Formal TVET Assessment Monitoring Tool",
+  sub:"Certificate and Diploma Assessments",
+  sections:[
+    {id:"A",title:"Identification Details",note:"Complete fully before commencing the monitoring exercise.",type:"ident",
+     fields:["Tool No.","Assessment Centre Name","UVTAB Centre No.","District","Address & GPS coordinates","Programme(s) being assessed","Level (Certificate / Diploma)","Assessment Series","Date(s) of Monitoring Visit","Time of arrival / departure","Head of Centre / Centre Coordinator","Centre Coordinator Contact","Area Coordinator assigned to centre","Number of candidates registered (Male / Female / PWD)","Number of candidates present at the time of visit","Paper(s) / Practical(s) being administered during visit","Name of Monitor","Designation / Role on the Board or Secretariat","Monitor Telephone & Email"]},
+    {id:"B",title:"Pre-Assessment Readiness & Centre Governance",note:"Verify that the centre is fully prepared to host the assessment series before the paper is sat.",type:"ind",
+     rows:[
+      ["1.1","The centre is duly licensed by TVET Council and accredited by UVTAB under the TVET Act 2025 and accreditation is valid for the ongoing assessment series.","Registration licence; accreditation certificate"],
+      ["1.2","An Assessment Task Force has been constituted, is functional, and includes the Head of Centre, programme heads, security focal person and a learner welfare representative.","Appointment letter; minutes of latest meeting"],
+      ["1.3","The official UVTAB assessment timetable for the series is displayed at the centre and accessible to candidates.","Observation of notice boards"],
+      ["1.4","All registered candidates appear on the UVTAB-issued attendance list and no unregistered candidates are sitting any paper.","UVTAB attendance lists; EIMS portal printout"],
+      ["1.5","Examination/assessment rooms have been inspected and approved; seating spacing meets a minimum of 1.25 m between candidates for written papers.","Direct observation; centre layout plan"],
+      ["1.6","Workshops, laboratories and practical assessment venues for the listed programmes are operational, with functional tools, equipment, water, power and consumables.","Workshop inspection; equipment register"],
+      ["1.7","Secure storage facility (strong room or lockable cabinet) for question papers and scripts is in place, accessible only to authorised key-holders, and a key-holder log is maintained.","Inspection of secure room; key-holder register"],
+      ["1.8","Supervisors, invigilators, scouts and monitors appointed for the centre are easily identifiable in line with UVTAB guidelines.","Identification cards/tags; deployment list"],
+      ["1.9","Candidates have been briefed by the Centre Coordinator on assessment regulations, prohibited items, expected conduct and grievance procedures.","Candidate briefing register"],
+      ["1.10","Emergency procedures (fire, medical, security) are documented, communicated and the first aid kit is stocked and accessible.","Emergency plan; first-aid log"],
+      ["1.11","Display of the UVTAB Notice to Candidates, examination rules and anti-malpractice notices is visible at all relevant venues.","Direct observation"]]},
+    {id:"C",title:"Conduct of Theory / Written Papers",note:"Observe at least one full session from registration to despatch of scripts.",type:"ind",
+     rows:[
+      ["2.1","Supervisors, invigilators and the lead scout are on-site at least 30 minutes before the scheduled start time of the paper.","Sign-in book; direct observation"],
+      ["2.2","Question paper security bags are intact on arrival at the venue, opened only in the presence of candidates, and the opening time is recorded.","Security bag inspection; supervisor log"],
+      ["2.3","Candidate identity is verified at registration using the UVTAB examinations permit and a recognised ID document; the attendance list is signed by each candidate.","Attendance list; ID checks observed"],
+      ["2.4","Seating is by candidate number; correct question paper version distributed to each candidate; spare papers controlled and accounted for.","Seating plan; paper distribution log"],
+      ["2.5","The paper starts and ends at the official UVTAB times; advance/follow-up time announcements are made and recorded.","Supervisor log; observation"],
+      ["2.6","Active invigilation is maintained throughout: invigilators are alert, mobile within the room, and not engaged in unrelated activities or personal devices.","Direct observation; rotation roster"],
+      ["2.7","Prohibited items (mobile phones, smart watches, programmable calculators, written notes, earpieces) are confiscated at entry and stored away from candidates.","Confiscation register; observation"],
+      ["2.8","Toilet access and any candidate exit/return is escorted by an invigilator and recorded with time stamps.","Toilet exit log"],
+      ["2.9","Late arrivals and any candidate leaving early are managed strictly in accordance with UVTAB regulations.","Late-arrival log"],
+      ["2.10","Suspected malpractice is documented in real time using the UVTAB Malpractice Report Form; the candidate continues the paper pending investigation.","Malpractice forms; supervisor report"],
+      ["2.11","Special needs candidates are accommodated as per their approved access arrangement (extra time, separate room, reader/scribe, large print, etc.).","Special needs schedule; observation"],
+      ["2.12","On completion, scripts are collected in candidate-number order, counted twice, sealed in the official UVTAB return bag, and the seal number is logged.","Script return log; return bag seal"]]},
+    {id:"D",title:"Conduct of Practical Assessments",note:"Observe at least one practical session per programme assessed at the centre.",type:"ind",
+     rows:[
+      ["3.1","External Assessors and Verifiers are UVTAB-accredited, present on time, and carrying valid identification and the official assessment plan.","Assessor accreditation register; ID checks"],
+      ["3.2","Tools, equipment, materials and consumables for each practical task are sufficient for the number of candidates being assessed in the session.","Equipment / materials checklist"],
+      ["3.3","Personal Protective Equipment (PPE) appropriate to the trade is available to all candidates and is being worn (e.g. overalls, gloves, safety boots, eye protection, hearing protection).","PPE issue register; observation"],
+      ["3.4","Workshop or laboratory layout supports safe candidate movement, with clear walkways, working extraction/ventilation, and accessible fire-fighting equipment.","Workshop inspection"],
+      ["3.5","Each candidate is assessed against the published UVTAB performance criteria using the standard observation checklist; ratings are recorded as the practical progresses, not retrospectively.","Completed observation checklists"],
+      ["3.6","Evidence of competence is captured through multiple sources (observation, finished product/output, oral questioning, written record) consistent with competency-based assessment principles.","Evidence portfolio; samples retained"],
+      ["3.7","The assessor-to-candidate ratio enables fair, individual judgement of each candidate (recommended not exceeding 1:15 for skilled trades unless justified).","Session schedule; observation"],
+      ["3.8","Industry/employer representatives have been invited or co-opted into the practical assessment where required by the programme regulations.","Industry assessor invitation; sign-in"],
+      ["3.9","Practical assessment safety incidents (injuries, near-misses, equipment failures) are recorded and reported per UVTAB protocols.","Incident register"]]},
+    {id:"E",title:"Integrity, Security & Malpractice Prevention",note:"Triangulate observation with documentary chain-of-custody evidence and short staff interviews.",type:"ind",
+     rows:[
+      ["4.1","Chain of custody for question papers is documented from receipt at the centre to opening, distribution and return.","Chain-of-custody form"],
+      ["4.2","Used scripts and completed practical assessment records are returned to UVTAB accredited storage facilities within one hour where logistically feasible or stored in the secure room with one person responsible for access.","Despatch records; secure-room access log"],
+      ["4.3","There is no unauthorised access to assessment materials by trainers, candidates or third parties; the secure room is not used for any other purpose during the series.","Secure-room inspection; access log"],
+      ["4.4","Where security agencies are deployed (per UVTAB protocol), their presence is appropriate, non-intrusive and supports rather than disrupts the conduct of the assessment.","Security deployment record; observation"],
+      ["4.5","No evidence of collusion between candidates, between candidates and staff, or of impersonation; any indicators are documented and reported.","Malpractice register; spot interviews"],
+      ["4.6","Centre staff who are also UVTAB external assessors are not assessing their own learners in line with conflict-of-interest provisions.","Conflict-of-interest declarations"]]},
+    {id:"F",title:"Candidate Welfare, Inclusion & Safeguarding",note:"Engage briefly with a small, randomly selected sample of candidates (with their consent).",type:"ind",
+     rows:[
+      ["5.1","Female candidates, candidates with disabilities and other learners with specific needs are visibly supported and not discriminated against during the assessment.","Observation; candidate short interviews"],
+      ["5.2","Clean drinking water, sanitary facilities and appropriate sanitary provisions for all candidates are available at the centre.","Facility inspection"],
+      ["5.3","A focal point for safeguarding (PSEAH) is identified at the centre, and candidates know how to report concerns.","PSEAH focal point identified; posters displayed"],
+      ["5.4","Reasonable adjustments for candidates with disabilities (physical access, sign language interpretation, assistive devices) are in place as per UVTAB Special Needs Guidelines.","Access arrangement record; observation"],
+      ["5.5","Mental health and welfare support, including appropriate response to candidate distress during the assessment, is available at the centre.","Welfare procedures; observation"]]},
+    {id:"G",title:"Documentation, Records & Continuous Improvement",note:"Sample at least three days' records where the visit follows several days of assessment.",type:"ind",
+     rows:[
+      ["6.1","Daily session reports are completed and signed by the Lead Supervisor and the Centre Coordinator.","Daily session reports"],
+      ["6.2","Stakeholder visit records (supervisors, invigilators, monitors that visit the centre) are recorded.","Visitor records"],
+      ["6.3","The centre has on file the appointment letters for all examination personnel deployed at the centre by UVTAB.","Records at the centre"],
+      ["6.4","The centre maintains a communication log of all interactions with the UVTAB Secretariat during the series.","Communications log"],
+      ["6.5","Continuous improvement: prior monitoring or Area Coordinator findings have been acted upon and corrective actions documented.","Previous reports & action tracker"]]},
+    {id:"H",title:"Overall Findings, Risks and Recommendations",type:"summary",
+     questions:["(i) Three most significant strengths observed at this centre:","(ii) Three most significant weaknesses / non-compliance issues observed:","(iii) Immediate corrective actions required (within 24 hours) — owner & deadline:","(iv) Medium-term recommendations for UVTAB Board / Senior Management attention:","(v) Risk classification — LOW / MEDIUM / HIGH. State reason:"]},
+    {id:"I",title:"Certification and Sign-off",type:"signoff",
+     cert:"I certify that I have conducted this monitoring visit in accordance with the UVTAB Code of Conduct for Monitors, the TVET Act No. 3 of 2025, and the UVTAB Assessment Guidelines. The findings recorded above are a true and complete reflection of what I observed during the visit.",
+     fields:["Name of Monitor","Designation / Role","Signature","Date","Counter-signed by Head of Centre (Name)","Head of Centre Signature & Date","Received at UVTAB Secretariat by","Date received at Secretariat"],
+     note:"A signed copy must be submitted to the Executive Secretary, UVTAB, within 48 hours. Any indicator rated 1 (Non-Compliant) requires same-day telephonic escalation to the UVTAB Secretariat."}
+  ]
+};
+
+const T2 = {
+  name:"Tool 2 — Informal TVET",
+  full:"Informal TVET Assessment Monitoring Tool",
+  sub:"Modular Certificates, Worker's PAS and Occupational Levels",
+  sections:[
+    {id:"A",title:"Identification Details",note:"Complete fully before commencing the monitoring exercise.",type:"ident",
+     fields:["Tool No.","Assessment Centre Name","UVTAB Centre No.","District","Address & GPS coordinates","Programme(s) being assessed","Level (Modular / Worker's PAS)","Assessment Series","Date(s) of Monitoring Visit","Time of arrival / departure","Head of Centre / Centre Coordinator","Centre Coordinator Contact","Area Coordinator assigned to centre","Number of candidates registered (Male / Female / PWD)","Number of candidates present at the time of visit","Paper(s) / Practical(s) being administered during visit","Name of Monitor","Designation / Role on the Board or Secretariat","Monitor Telephone & Email"]},
+    {id:"B",title:"Pre-Assessment Readiness, Trades & Worksite Conditions",note:"Informal TVET assessments often take place in workshops, salons, garages, kitchens, farms and other operational sites; readiness must be judged against the realities of the trade.",type:"ind",
+     rows:[
+      ["1.1","The centre is duly licensed by TVET Council and accredited by UVTAB under the TVET Act 2025 and accreditation is valid for the ongoing assessment series.","Registration licence; accreditation certificate"],
+      ["1.2","Candidates registered for assessment have been validated against the UVTAB candidate list; walk-in candidates without prior registration are not being assessed.","UVTAB candidate register; EIMS printout"],
+      ["1.3","Pre-assessment briefing has been delivered in language(s) understood by candidates (English, the regional language and, where applicable, sign language).","Briefing register; observation"],
+      ["1.4","The trades being assessed at the centre are matched to the centre's accredited scope.","Centre accreditation scope; trade list"],
+      ["1.5","Tools, equipment, materials, raw materials and consumables required for each trade's practical demonstration are available in sufficient quantities for the candidates scheduled.","Trade-specific equipment checklist"],
+      ["1.6","Appropriate PPE (overalls, safety boots, gloves, eye protection, hearing protection, dust masks, hairnets, aprons) for each trade is available and being worn.","PPE issue register; observation"],
+      ["1.7","For Worker's PAS / RPL candidates, evidence portfolios (work samples, photographs, employer attestations, prior certificates) are available at the centre for assessor review.","Portfolio sample review"],
+      ["1.8","Workshop, salon, kitchen, garage, farm or field site used for assessment is safe, fit-for-purpose, with adequate water, power, ventilation and waste management for the trades concerned.","Site inspection"],
+      ["1.9","UVTAB-accredited Assessors (and Internal Verifiers, where deployed) have arrived on time, are carrying valid UVTAB identification, and are not assessing candidates with whom they have a conflict of interest.","Assessor accreditation register; conflict-of-interest log"]]},
+    {id:"C",title:"Conduct of Practical Demonstration (Primary Assessment Mode)",note:"The bulk of the judgement in informal TVET assessment is on the live practical. Observe at least one full demonstration per trade where feasible.",type:"ind",
+     rows:[
+      ["2.1","Each candidate is assessed against the published UVTAB occupational standards / Assessment Training Package for the trade, at the correct level.","Occupational standards in use; observation"],
+      ["2.2","The assessor uses the standard UVTAB Observation Checklist for the trade and records candidate performance as the demonstration progresses (live capture, not retrospective).","Completed observation checklists"],
+      ["2.3","The candidate performs the task in conditions that approximate real work — using genuine tools, materials and time pressures of the trade, not simplified or staged versions.","Direct observation"],
+      ["2.4","The assessor judges holistically across the Dimensions of Competency: task skills, task management skills, contingency management skills, and job/role environment skills.","Assessor's evidence record"],
+      ["2.5","Multiple forms of evidence are gathered — observation of process, inspection of the finished product/output, oral questioning, and (where relevant) a third-party report or workplace testimonial.","Evidence matrix"],
+      ["2.6","Safety throughout the demonstration is monitored; any unsafe practice by a candidate is corrected and noted, and a candidate is stopped where there is risk of injury.","Observation; safety log"],
+      ["2.7","The assessor is fair and consistent: candidates of different sex, age, disability status and trade background are judged against the same criteria.","Triangulation: observation + candidate interviews"],
+      ["2.8","Time allocation per candidate enables a credible judgement (typically 30–90 minutes per practical task at Level 1/2 depending on the trade).","Assessment schedule; observation"],
+      ["2.9","Where finished work samples / products are produced (e.g. a tailored garment, a welded joint, a baked product, a repaired phone), they are retained or photographed as part of the evidence record.","Sample retention; photograph register"],
+      ["2.10","An Independent Observer is present for a sample of assessments to verify consistency, providing silent observation and post-assessment feedback to the assessor.","Independent Observer report"]]},
+    {id:"D",title:"Oral Questioning & Short Written / Theory Test",note:"Underpinning knowledge is most often assessed orally and integrated with the practical.",type:"ind",
+     rows:[
+      ["3.1","Oral questioning by the assessor probes underpinning knowledge, safety knowledge, and contingency handling — not just steps the candidate has just performed.","Oral questioning record"],
+      ["3.2","Questions are asked in a language the candidate clearly understands; an interpreter is provided where necessary and recorded as such.","Observation; language used logged"],
+      ["3.3","The candidate's responses are recorded by the assessor against the relevant knowledge criteria.","Oral assessment record"],
+      ["3.4","Where a short-written test is included (e.g. trade theory for Level 2), it is conducted under appropriate supervision and the script is collected and stored securely.","Theory test record"]]},
+    {id:"E",title:"Worker's PAS & Recognition of Prior Learning (RPL) Process",note:"Applies to candidates being certified on the basis of prior occupational experience rather than recent training.",type:"ind",
+     rows:[
+      ["4.1","Worker's PAS / RPL candidates have been pre-screened: prior experience, prior training and prior certificates have been reviewed before the on-site assessment.","RPL pre-screening record"],
+      ["4.2","Evidence portfolios meet the Validity, Sufficiency, Authenticity and Currency tests (the four CBA evidence rules).","Evidence portfolio review notes"],
+      ["4.3","Employer / workplace attestations bear verifiable contacts and have been spot-checked by the assessor.","Attestation forms; verification log"],
+      ["4.4","Candidates who do not yet demonstrate full competence are referred for gap training and a re-assessment date is recorded — they are not failed without a development pathway being explained.","Referral / gap-training records"]]},
+    {id:"F",title:"Inclusion, Equity & Candidate Welfare",note:"Informal TVET draws candidates from particularly diverse backgrounds; equity should be visible.",type:"ind",
+     rows:[
+      ["5.1","Female candidates in traditionally male-dominated trades (welding, plumbing, mechanics, electrical) are present and being assessed on equal terms.","Disaggregated candidate list; observation"],
+      ["5.2","Candidates with disabilities have reasonable adjustments in place and the assessment method has been adapted without lowering the standard.","Special needs schedule; observation"],
+      ["5.3","Refugee and host-community candidates (where relevant) are present and assessed under the same conditions as other candidates.","Candidate disaggregation; interviews"],
+      ["5.4","There is no evidence of demand for unofficial payment from candidates by centre staff or assessors.","Candidate interviews; financial records"],
+      ["5.5","Welfare provision (water, sanitation, rest area, sanitary materials for female candidates, breastfeeding space where applicable) is available.","Facility inspection"]]},
+    {id:"G",title:"Integrity & Security",note:"Risks differ from formal TVET: principal risks are portfolio fabrication, impersonation and inducement of assessors.",type:"ind",
+     rows:[
+      ["6.1","Assessment records (observation checklists, evidence records, oral questioning records, portfolios) are collected by the lead assessor at the close of the session and stored securely.","Records storage observation"],
+      ["6.2","No collusion observed: candidates are not coached during the demonstration; assessors do not perform parts of the task on behalf of the candidate.","Direct observation"],
+      ["6.3","Impersonation checks: photographic ID is matched to the candidate at the start of the practical demonstration.","ID matching observation"],
+      ["6.4","Any malpractice (impersonation, falsified portfolio, inducement of an assessor) is documented and reported using the UVTAB Malpractice Report Form.","Malpractice reports"]]},
+    {id:"H",title:"Documentation, Disaggregated Data & Continuous Improvement",note:"Especially important given the new UVTAB quarterly cycle for informal TVET introduced in 2026.",type:"ind",
+     rows:[
+      ["7.1","Daily session report is completed by the lead assessor, signed by the Head of Centre and submitted to the Area Coordinator.","Daily reports"],
+      ["7.2","Disaggregated candidate data (by sex, disability, age, trade, level, location) is captured accurately.","Candidate data sheets"],
+      ["7.3","Quarterly assessment cycle requirements are observed: the centre is not conducting parallel informal assessments outside the UVTAB schedule.","Centre records; UVTAB schedule"],
+      ["7.4","Continuous improvement: prior Area Coordinator findings and prior quarterly monitoring observations have been acted upon.","Previous reports; action tracker"],
+      ["7.5","There is a clear feedback loop to candidates on results and next steps (re-assessment, gap training, certification, transition to Level 2).","Candidate feedback procedure"]]},
+    {id:"I",title:"Overall Findings, Risks and Recommendations",type:"summary",
+     questions:["(i) Three most significant strengths observed at this centre:","(ii) Three most significant weaknesses / non-compliance issues observed:","(iii) Immediate corrective actions required (within 24 hours) — owner & deadline:","(iv) Medium-term recommendations for UVTAB Board / Senior Management attention:","(v) Risk classification — LOW / MEDIUM / HIGH. State reason:"]},
+    {id:"J",title:"Certification and Sign-off",type:"signoff",
+     cert:"I certify that I have conducted this monitoring visit in accordance with the UVTAB Code of Conduct for Monitors, the TVET Act No. 3 of 2025, and the UVTAB Assessment Guidelines. The findings recorded above are a true and complete reflection of what I observed during the visit.",
+     fields:["Name of Monitor","Designation / Role","Signature","Date","Counter-signed by Head of Centre (Name)","Head of Centre Signature & Date","Received at UVTAB Secretariat by","Date received at Secretariat"],
+     note:"A signed copy must be submitted to the Executive Secretary, UVTAB, within 48 hours of the close of the visit. Any indicator rated 1 (Non-Compliant) requires same-day telephonic escalation to the UVTAB Operations Room."}
+  ]
+};
+
+const AX1_ROWS = [
+  "Section B — Pre-assessment readiness",
+  "Section C — Written/theory papers (Tool 1) / Practical demonstration (Tool 2)",
+  "Section D — Practical assessment (Tool 1) / Oral & theory (Tool 2)",
+  "Section E — Integrity & Security (Tool 1) / Worker's PAS & RPL (Tool 2)",
+  "Section F — Welfare & Inclusion",
+  "Section G — Documentation & Governance"
+];
+const AX1_COLS = ["Observation","Document review","Interview","Photo / evidence retained"];
+const AX2_ROWS = [
+  ["CRIT","CRITICAL","Leakage of question papers; mass impersonation; physical injury during practical; assault or harassment of a candidate; collapse of centre security.","UVTAB Executive Secretary directly, or UVTAB Hot Line.","Immediately (telephone)"],
+  ["HIGH","HIGH","Suspected malpractice involving a centre official; absence of accredited assessor; serious PPE failure; unauthorised payment from candidates.","UVTAB Hot Line → Deputy Executive Secretary TVET Assessment.","Within 4 hours"],
+  ["MED","MEDIUM","Significant gaps in materials/equipment; weak invigilation; inadequate special needs accommodation; record-keeping failure.","Area Coordinator → Manager Assessment Services → Deputy Executive Secretary TVET Assessment.","Same day"],
+  ["LOW","LOW","Minor procedural lapses correctable on the spot; cosmetic or comfort issues; isolated tardiness.","Centre Coordinator → Area Coordinator.","Note in report"]
+];
+
+/* ======================================================
+   STATE
+   ====================================================== */
+const S = { tool:'T1', idx:0, data:{} };
+const tools = { T1, T2 };
+
+function k(t,s,f){ return t+'|'+s+'|'+f; }
+function gd(key){ return S.data[key]||''; }
+function sd(key,val){ S.data[key]=val; updateProg(); }
+
+/* ======================================================
+   HELPERS
+   ====================================================== */
+function rcls(v){ return v==='1'?'r1':v==='2'?'r2':v==='3'?'r3':v==='4'?'r4':v==='NA'?'rNA':''; }
+
+function ratingSelect(t,sid,no){
+  const key=k(t,sid,no+'_r');
+  const v=gd(key);
+  return `<select class="rsel ${rcls(v)}" onchange="sd('${key}',this.value);this.className='rsel '+rcls(this.value)">
+    <option value="">— Rate —</option>
+    <option value="4"${v==='4'?' selected':''}>4 — Fully Compliant</option>
+    <option value="3"${v==='3'?' selected':''}>3 — Compliant</option>
+    <option value="2"${v==='2'?' selected':''}>2 — Partially Compliant</option>
+    <option value="1"${v==='1'?' selected':''}>1 — Non-Compliant</option>
+    <option value="NA"${v==='NA'?' selected':''}>NA — Not Applicable</option>
+  </select>`;
+}
+
+function findArea(t,sid,no){
+  const key=k(t,sid,no+'_f');
+  const v=gd(key);
+  return `<textarea class="fita" placeholder="Findings…" rows="3" onchange="sd('${key}',this.value)">${esc(v)}</textarea>`;
+}
+
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+/* ======================================================
+   SECTION COMPLETION
+   ====================================================== */
+function secComp(t, sec){
+  if(sec.type==='ident'){
+    const n=sec.fields.filter(f=>gd(k(t,sec.id,f))).length;
+    return n/sec.fields.length;
+  }
+  if(sec.type==='ind'){
+    const n=sec.rows.filter(r=>gd(k(t,sec.id,r[0]+'_r'))).length;
+    return n/sec.rows.length;
+  }
+  if(sec.type==='summary'){
+    const n=sec.questions.filter((_,i)=>gd(k(t,sec.id,'q'+i))||gd(k(t,sec.id,'risk'))).length;
+    return n/sec.questions.length;
+  }
+  if(sec.type==='signoff'){
+    const n=sec.fields.filter(f=>gd(k(t,sec.id,f))).length;
+    return n/sec.fields.length;
+  }
+  return 0;
+}
+
+function overallProg(){
+  if(S.tool==='AX') return 0;
+  const secs=tools[S.tool].sections;
+  const total=secs.reduce((a,s)=>a+secComp(S.tool,s),0);
+  return Math.round(total/secs.length*100);
+}
+
+/* ======================================================
+   SCORE SUMMARY FOR INDICATOR SECTIONS
+   ====================================================== */
+function scoreBar(t, sec){
+  if(sec.type!=='ind') return '';
+  const counts={1:0,2:0,3:0,4:0,NA:0};
+  sec.rows.forEach(r=>{
+    const v=gd(k(t,sec.id,r[0]+'_r'));
+    if(v && counts[v]!==undefined) counts[v]++;
+  });
+  const total=sec.rows.filter(r=>gd(k(t,sec.id,r[0]+'_r'))&&gd(k(t,sec.id,r[0]+'_r'))!=='NA').length;
+  const sum=counts['4']*4+counts['3']*3+counts['2']*2+counts['1']*1;
+  const max=total*4;
+  const pct=max?Math.round(sum/max*100):0;
+  if(!total) return '';
+  return `<div class="score-panel">
+    <span class="score-chip" style="background:#eff6ff;color:#1e40af">Rated: ${Object.values(counts).reduce((a,b)=>a+b,0)}/${sec.rows.length}</span>
+    ${counts['1']?`<span class="score-chip" style="background:#fef2f2;color:#991b1b">⚠ Non-Compliant: ${counts['1']}</span>`:''}
+    ${counts['2']?`<span class="score-chip" style="background:#fffbeb;color:#92400e">Partial: ${counts['2']}</span>`:''}
+    ${counts['3']?`<span class="score-chip" style="background:#f0fdf4;color:#166534">Compliant: ${counts['3']}</span>`:''}
+    ${counts['4']?`<span class="score-chip" style="background:#eff6ff;color:#1e40af">Excellent: ${counts['4']}</span>`:''}
+    ${total?`<span class="score-chip" style="background:#f3f4f6;color:#374151">Score: ${pct}%</span>`:''}
+  </div>`;
+}
+
+/* ======================================================
+   RENDERERS
+   ====================================================== */
+function renderIdent(t, sec){
+  const rows=sec.fields.map(f=>`
+    <div class="il">${esc(f)}</div>
+    <div class="iv"><input type="text" value="${esc(gd(k(t,sec.id,f)))}" placeholder="Enter…" onchange="sd('${k(t,sec.id,f)}',this.value)"></div>`).join('');
+  return `<div class="ident-grid">${rows}</div>`;
+}
+
+function renderInd(t, sec){
+  const rows=sec.rows.map(([no,ind,mv])=>`
+    <tr>
+      <td class="td-no">${no}</td>
+      <td class="td-ind">${esc(ind)}</td>
+      <td class="td-mv">${esc(mv)}</td>
+      <td class="td-rt">${ratingSelect(t,sec.id,no)}</td>
+      <td class="td-fi">${findArea(t,sec.id,no)}</td>
+    </tr>`).join('');
+  return `
+    <div class="legend-bar">
+      <span class="leg"><span class="legdot" style="background:#eff6ff;border-color:#93c5fd"></span>4 Fully Compliant</span>
+      <span class="leg"><span class="legdot" style="background:#f0fdf4;border-color:#86efac"></span>3 Compliant</span>
+      <span class="leg"><span class="legdot" style="background:#fffbeb;border-color:#fcd34d"></span>2 Partially Compliant</span>
+      <span class="leg"><span class="legdot" style="background:#fef2f2;border-color:#fca5a5"></span>1 Non-Compliant</span>
+      <span class="leg"><span class="legdot" style="background:#f9fafb;border-color:#d1d5db"></span>NA Not Applicable</span>
+    </div>
+    <div style="overflow-x:auto">
+    <table class="itbl">
+      <thead><tr>
+        <th style="width:48px">No.</th>
+        <th>Indicator / Item to Verify</th>
+        <th style="width:175px">Means of Verification</th>
+        <th style="width:130px">Rating (1–4 / NA)</th>
+        <th style="width:210px">Findings / Evidence / Action</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    </div>
+    ${scoreBar(t,sec)}`;
+}
+
+function renderSummary(t, sec){
+  const qs=sec.questions.map((q,i)=>{
+    const isRisk=q.includes('LOW / MEDIUM / HIGH');
+    const kq=k(t,sec.id,'q'+i);
+    const kr=k(t,sec.id,'risk');
+    const vq=gd(kq); const vr=gd(kr);
+    if(isRisk) return `
+      <div class="oq">
+        <label>${esc(q)}</label>
+        <div class="risk-row">
+          ${['LOW','MED','HIGH'].map(r=>`<button class="rbtn ${r}${vr===r?' on':''}" onclick="sd('${kr}','${r}');document.querySelectorAll('[data-rg=${t+sec.id}]').forEach(b=>b.classList.remove('on'));this.classList.add('on')" data-rg="${t+sec.id}">${r==='MED'?'MEDIUM':r}</button>`).join('')}
+        </div>
+        <textarea class="fita" style="margin-top:8px" placeholder="State reason…" rows="3" onchange="sd('${kq}',this.value)">${esc(vq)}</textarea>
+      </div>`;
+    return `<div class="oq"><label>${esc(q)}</label><textarea placeholder="Enter findings…" rows="4" onchange="sd('${kq}',this.value)">${esc(vq)}</textarea></div>`;
+  }).join('');
+  return `<div class="sum-wrap">${qs}</div>`;
+}
+
+function renderSignoff(t, sec){
+  const rows=sec.fields.map(f=>`
+    <div class="sl">${esc(f)}</div>
+    <div class="si"><input type="text" value="${esc(gd(k(t,sec.id,f)))}" placeholder="Enter…" onchange="sd('${k(t,sec.id,f)}',this.value)"></div>`).join('');
+  return `
+    <div class="cert-box"><p>${esc(sec.cert)}</p></div>
+    <div class="so-grid">${rows}</div>
+    <div class="note-bar"><p>${esc(sec.note)}</p></div>`;
+}
+
+function renderAx1(){
+  const rows=AX1_ROWS.map(row=>{
+    const cells=AX1_COLS.map((col,ci)=>{
+      const ky='AX|A1|'+row+'|'+ci;
+      const on=gd(ky)?'on':'';
+      return `<td style="text-align:center"><span class="chk ${on}" onclick="toggleChk('${ky}',this)">${on?'✓':''}</span></td>`;
+    }).join('');
+    return `<tr><td>${esc(row)}</td>${cells}</tr>`;
+  }).join('');
+  return `<div style="padding:18px">
+    <p style="font-size:13px;color:#6b7280;margin-bottom:14px;font-style:italic">For each section, demonstrate that at least three sources of evidence were used. Tick the sources used.</p>
+    <div style="overflow-x:auto"><table class="ax-table">
+      <thead><tr><th>Section monitored</th>${AX1_COLS.map(c=>`<th style="text-align:center;width:100px">${c}</th>`).join('')}</tr></thead>
+      <tbody>${rows}</tbody>
+    </table></div>
+  </div>`;
+}
+
+function renderAx2(){
+  const sevMap={CRIT:'sev-crit',HIGH:'sev-high',MED:'sev-med',LOW:'sev-low'};
+  const rows=AX2_ROWS.map(([sc,sev,ex,esc2,within])=>`
+    <tr>
+      <td><span class="sev ${sevMap[sc]}">${sev}</span></td>
+      <td style="font-size:13px">${esc(ex)}</td>
+      <td style="font-size:13px">${esc(esc2)}</td>
+      <td style="font-size:13px;white-space:nowrap;font-weight:500">${within}</td>
+    </tr>`).join('');
+  return `<div style="padding:18px;overflow-x:auto"><table class="ax-table">
+    <thead><tr><th style="width:80px">Severity</th><th>Type of issue</th><th>Escalate to</th><th style="width:120px">Within</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table></div>`;
+}
+
+function toggleChk(ky,el){
+  const v=gd(ky);
+  const nv=v?'':'1';
+  sd(ky,nv);
+  el.classList.toggle('on',!!nv);
+  el.textContent=nv?'✓':'';
+}
+
+/* ======================================================
+   SECTION NAV
+   ====================================================== */
+function renderSecNav(){
+  if(S.tool==='AX') return '';
+  const secs=tools[S.tool].sections;
+  return secs.map((sec,i)=>{
+    const c=secComp(S.tool,sec);
+    const cls=c>0.95?'done':c>0?'partial':'';
+    return `<div class="snbtn${i===S.idx?' active':''} ${cls}" onclick="goSec(${i})">
+      <span class="dot"></span>${sec.id}. ${sec.title.split(' ').slice(0,3).join(' ')}…
+    </div>`;
+  }).join('');
+}
+
+/* ======================================================
+   PROGRESS
+   ====================================================== */
+function updateProg(){
+  const pct=overallProg();
+  const f=document.getElementById('pf');
+  const l=document.getElementById('pl');
+  if(f) f.style.width=pct+'%';
+  if(l) l.textContent=pct+'% complete';
+  // update dot classes
+  if(S.tool!=='AX'){
+    const btns=document.querySelectorAll('.snbtn');
+    const secs=tools[S.tool].sections;
+    btns.forEach((btn,i)=>{
+      if(i<secs.length){
+        const c=secComp(S.tool,secs[i]);
+        btn.classList.toggle('done',c>0.95);
+        btn.classList.toggle('partial',c>0&&c<=0.95);
+      }
+    });
+  }
+}
+
+/* ======================================================
+   CURRENT SECTION CONTENT
+   ====================================================== */
+function renderContent(){
+  if(S.tool==='AX'){
+    return `<div class="card"><div class="sec-head"><span class="sec-badge">Annex 1</span><h2>Triangulation Evidence Matrix</h2></div>${renderAx1()}</div>
+    <div class="card"><div class="sec-head"><span class="sec-badge">Annex 2</span><h2>Escalation Matrix</h2></div>${renderAx2()}</div>`;
+  }
+  const tool=tools[S.tool];
+  const sec=tool.sections[S.idx];
+  let body='';
+  if(sec.type==='ident') body=renderIdent(S.tool,sec);
+  else if(sec.type==='ind') body=renderInd(S.tool,sec);
+  else if(sec.type==='summary') body=renderSummary(S.tool,sec);
+  else if(sec.type==='signoff') body=renderSignoff(S.tool,sec);
+  return `<div class="card">
+    <div class="sec-head">
+      <span class="sec-badge">${tool.name} · Section ${sec.id}</span>
+      <h2>${sec.title}</h2>
+      ${sec.note?`<div class="note">${esc(sec.note)}</div>`:''}
+    </div>
+    ${body}
+  </div>`;
+}
+
+/* ======================================================
+   FULL RENDER
+   ====================================================== */
+function render(){
+  const secs=S.tool==='AX'?null:tools[S.tool].sections;
+  const pct=overallProg();
+  const canPrev=S.tool!=='AX'&&S.idx>0;
+  const canNext=S.tool!=='AX'&&secs&&S.idx<secs.length-1;
+
+  document.getElementById('root').innerHTML=`
+    <div class="app-header">
+      <div class="header-top">
+        <div class="logo">UV</div>
+        <div class="header-title">
+          <h1>UVTAB Assessment Monitoring Tool — Digital Form</h1>
+          <p>Uganda Vocational &amp; Technical Assessment Board &nbsp;·&nbsp; Quality Assurance Division &nbsp;·&nbsp; v1.0 April 2026</p>
+        </div>
+        <div class="header-actions">
+          <button class="hbtn hbtn-ghost" onclick="resetSec()">Reset Section</button>
+          <button class="hbtn hbtn-gold" onclick="window.print()">🖨 Print</button>
+        </div>
+      </div>
+      <div class="tool-tabs">
+        <div class="ttab${S.tool==='T1'?' active':''}" onclick="switchTool('T1')">📋 Tool 1 — Formal TVET</div>
+        <div class="ttab${S.tool==='T2'?' active':''}" onclick="switchTool('T2')">📋 Tool 2 — Informal TVET</div>
+        <div class="ttab${S.tool==='AX'?' active':''}" onclick="switchTool('AX')">📎 Annexes</div>
+      </div>
+    </div>
+    <div class="sec-nav" id="sn">${renderSecNav()}</div>
+    <div class="main">
+      ${renderContent()}
+      <div class="card">
+        <div class="nav-bar">
+          <div class="prog-info">
+            <div id="pl">${pct}% complete</div>
+            <div class="prog-bar"><div class="prog-fill" id="pf" style="width:${pct}%"></div></div>
+          </div>
+          <div class="btn-grp">
+            <button class="btn btn-ghost" onclick="goSec(${S.idx-1})" ${canPrev?'':'disabled'}>← Previous</button>
+            <button class="btn btn-primary" onclick="goSec(${S.idx+1})" ${canNext?'':'disabled'}>Next →</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ======================================================
+   NAVIGATION
+   ====================================================== */
+function switchTool(t){ S.tool=t; S.idx=0; render(); window.scrollTo({top:0,behavior:'smooth'}); }
+function goSec(i){
+  const secs=S.tool==='AX'?null:tools[S.tool].sections;
+  if(!secs||i<0||i>=secs.length) return;
+  S.idx=i; render(); window.scrollTo({top:0,behavior:'smooth'});
+}
+function resetSec(){
+  if(!confirm('Reset all entries in this section?')) return;
+  if(S.tool==='AX') return;
+  const sec=tools[S.tool].sections[S.idx];
+  const prefix=S.tool+'|'+sec.id+'|';
+  Object.keys(S.data).forEach(k=>{ if(k.startsWith(prefix)) delete S.data[k]; });
+  render();
+}
+
+/* ======================================================
+   SCROLL TO TOP BUTTON
+   ====================================================== */
+window.addEventListener('scroll',()=>{
+  const b=document.getElementById('topBtn');
+  if(b) b.style.display=window.scrollY>250?'flex':'none';
+});
+
+/* ======================================================
+   INIT
+   ====================================================== */
+render();
+</script>
+</body>
+</html>
